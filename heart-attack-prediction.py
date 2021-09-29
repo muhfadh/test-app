@@ -3,10 +3,18 @@ import streamlit as st
 # working with sample data.
 import numpy as np
 import pandas as pd
-import pickle
 
 st.title('Prediksi Serangan Jantung dengan KNN Classification')
 st.sidebar.header('Input Data Prediksi Serangan Jantung')
+
+df_heart = pd.read_csv('heart.csv')
+dups_data = df_heart.duplicated()
+data_heart = df_heart.drop_duplicates()
+X = data_heart.drop('target',axis=1)
+Y = data_heart['target']
+
+from sklearn.neighbors import KNeighborsClassifier
+
 
 def user_input_features():
     age = st.sidebar.slider('age', 29,77,45)
@@ -44,15 +52,16 @@ df = user_input_features()
 st.subheader('Data Input dari User')
 st.write(df)
 
-load_predic = pickle.load(open('model.pkl', 'rb'))
 
-prediction = load_predic.predict(df)
+knn = KNeighborsClassifier(n_neighbors=35)
+knn.fit(X,Y)
+prediction = knn.predict(df)
 
-st.subheader('Prediksi')
+
+st.header('Prediksi serangan jantung')
 heart_attack_clf = np.array(['Resiko Rendah', 'Resiko Tinggi'])
 st.text(heart_attack_clf[prediction])
-prediction_proba = load_predic.predict_proba(df)
-st.subheader('Prediction Probability')
+prediction_proba = knn.predict_proba(df)
 st.write(prediction_proba)
 
 info = st.button('Informasi Atribut')
